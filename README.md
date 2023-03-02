@@ -1,7 +1,7 @@
 # csv_file_reader
 > Read csv type file and makes a plot out of it
 
-> <span style="color:blue">some *Can plot any function using numpy* text</span>.
+> Can plot any function using numpy
 
 > Can highlight 2 separate lines
 
