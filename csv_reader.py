@@ -144,7 +144,6 @@ class PlotWindow:
             print('\033[91mUnvalid input, your input was' ,f'{entry!r}','\033[0m')
     def load_file(self):
         entry = filedialog.askopenfilename(parent=root, title='Choose a file')
-        print('here')
         try:
             self.file_path.append(entry)
             for i in range(len(self.file_path)):
@@ -156,14 +155,11 @@ class PlotWindow:
         except:
             pass
     def draw(self,file_path,zoomplus=False,zoommoins=False,pad_haut=False,pad_bas=False,pad_droit=False,pad_gauche=False):
-        print('here2')
         try:
             with open(file_path, 'r') as file_in:
                 file = [line.replace(',', '.').strip() for line in file_in.readlines()[3:]]
                 data = np.array([list(map(float, line.split(';'))) for line in file])
             number_of_graphs = len(data[0])-1
-            print('here3')
-            print(number_of_graphs)
             if number_of_graphs < 2:
                 time, signal1 = data[0:len(data) - 1, 0], data[0:len(data) - 1, 1]
                 if max(signal1) > 50:
@@ -175,11 +171,7 @@ class PlotWindow:
 
             else:
                 time, signal1, signal2 = data[0:len(data) - 1, 0], data[0:len(data) - 1, 1], data[0:len(data) - 1,2]
-                print('here4')
-                print(max(time))
                 if max(signal1) > 50 or max(signal2) > 50:
-                    print('here5')
-                    print(time)
                     signal1 = signal1 / 100
                     signal2 = signal2 /100
                 if max(time) > 50:
