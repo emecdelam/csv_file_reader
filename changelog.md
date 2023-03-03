@@ -6,3 +6,6 @@
 * No automatic legend\
 * Some bug when using the draw function doesn't work for a numpy constant and a numpy array\
 > ex : e+sin(x)
+## V0.02
+### Update :
+* Updated the time scaling
