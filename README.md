@@ -17,3 +17,7 @@
 - [x] `Can offset graphs`
 
 - [x] `Randomly chooses color`
+
+# **Reports**
+
+- Feel free to report any error or bugged features and even suggest updates content
