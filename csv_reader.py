@@ -4,15 +4,28 @@ import tkinter as tk
 from tkinter import filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from numpy import e, sin, pi, cos, tan
+from matplotlib.font_manager import FontProperties
+import random
+import traceback as tr
+import os
+
+font = FontProperties()
+font.set_family('serif')
+font.set_size('20')
+colors = ['r', 'g', 'b', 'k','c','m','y']
+
 
 class PlotWindow:
     #==============
     # Names and var
     #==============
-    __xlabel = " Temps [ s ] "
+
+    __xlabel = " Temps [ us ]"
     __ylabel = " Tension [ V ] "
     __name = " Signal data "
     def __init__(self, master):
+        self.offset_1 = 0
+        self.offset_2 = 0
         self.file_path = []
         self.highlight = None
         self.highlight2 = None
@@ -29,10 +42,10 @@ class PlotWindow:
         button_erase.place(x=250, y=50)
         button_zoomplus = tk.Button(master, text="Zoom - ", command=self.zoomplus)
         button_zoomplus.pack(side=tk.TOP)
-        button_zoomplus.place(x=500,y=50)
+        button_zoomplus.place(x=550,y=50)
         button_zoommoins = tk.Button(master, text="Zoom +", command=self.zoommoins)
         button_zoommoins.pack(side=tk.TOP)
-        button_zoommoins.place(x=500,y=75)
+        button_zoommoins.place(x=550,y=75)
         button_load = tk.Button(master, text="Load File", command=self.load_file)
         button_load.pack(side=tk.TOP)
         button_load.place(x=350, y=50)
@@ -42,6 +55,12 @@ class PlotWindow:
         button_line2 = tk.Button(master, text="Highlight2", command=self.highlighting2)
         button_line2.pack(side=tk.TOP)
         button_line2.place(x=700,y=75)
+        button_zoom_droit = tk.Button(master, text="zoom x",command=self.zoom_droit)
+        button_zoom_droit.pack(side=tk.TOP)
+        button_zoom_droit.place(x=600, y=50)
+        button_zoom_gauche = tk.Button(master, text="zoom y", command=self.zoom_gauche)
+        button_zoom_gauche.pack(side=tk.TOP)
+        button_zoom_gauche.place(x=600, y=75)
         self.entry = tk.Entry(master)
         self.entry.pack(side=tk.TOP)
         self.entry.place(x=775,y=50)
@@ -50,18 +69,16 @@ class PlotWindow:
         self.entry2.place(x=775,y=75)
         button_draw_func = tk.Button(master, text="Draw", command=self.get_function)
         button_draw_func.pack(side=tk.TOP)
-        button_draw_func.place(x=1100, y=50)
+        button_draw_func.place(x=350, y=75)
+        self.scale_b = tk.Entry(master)
+        self.scale_b.pack(side=tk.TOP)
+        self.scale_b.place(x=1600,y=50)
+        self.scale_g = tk.Entry(master)
+        self.scale_g.pack(side=tk.TOP)
+        self.scale_g.place(x=1600,y=75)
         self.func = tk.Entry(master)
         self.func.pack(side=tk.TOP)
-        self.func.place(x=1140, y=50)
-        """
-        button_offset = tk.Button(master, text="Offset", command=self.offset)
-        button_offset.pack(side=tk.TOP)
-        button_offset.place(x=1400,y=75)
-        self.entry_offset = tk.Entry(master)
-        self.entry_offset.pack(side=tk.TOP)
-        self.entry_offset.place(x=1450,y=75)"""
-
+        self.func.place(x=390, y=75)
         button_pad_haut = tk.Button(master,text='↑',command=self.pad_haut)
         button_pad_haut.pack(side=tk.TOP)
         button_pad_haut.place(x=1300,y=25)
@@ -74,12 +91,38 @@ class PlotWindow:
         button_pad_gauche = tk.Button(master, text='←', command=self.pad_gauche)
         button_pad_gauche.pack(side=tk.TOP)
         button_pad_gauche.place(x=1280, y=50)
+        button_scale_bas = tk.Button(master,text='Time scale',command=self.scale_bas)
+        button_scale_bas.pack(side=tk.TOP)
+        button_scale_bas.place(x=1500, y=50)
+        button_scale_gauche = tk.Button(master,text='Unit scale',command=self.scale_gauche)
+        button_scale_gauche.pack(side=tk.TOP)
+        button_scale_gauche.place(x=1500, y=75)
+        button_text_offset_1 = tk.Button(master, text="Offset 1", command=self.offset)
+        button_text_offset_1.pack(side=tk.TOP)
+        button_text_offset_1.place(x=950, y=50)
+        button_text_offset_1 = tk.Button(master, text="Offset 2", command=self.offset)
+        button_text_offset_1.pack(side=tk.TOP)
+        button_text_offset_1.place(x=950, y=75)
+        self.offset_1_entry = tk.Entry(master)
+        self.offset_1_entry.pack(side=tk.TOP)
+        self.offset_1_entry.place(x=1000, y=50)
+        self.offset_2_entry = tk.Entry(master)
+        self.offset_2_entry.pack(side=tk.TOP)
+        self.offset_2_entry.place(x=1000, y=75)
+
+
+
         self.canvas.draw()
 
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
     def offset(self):
-        pass
-
+        if self.offset_1_entry.get() != '':
+            self.offset_1 = float(self.offset_1_entry.get())
+        if self.offset_2_entry.get() != '' :
+            self.offset_2 = float(self.offset_2_entry.get())
+        plt.cla()
+        for i in range(len(self.file_path)):
+            self.draw(file_path=self.file_path[i])
     def get_function(self):
         entry = self.func.get()
         self.function.append(entry)
@@ -103,6 +146,14 @@ class PlotWindow:
         plt.cla()
         for i in range(len(self.file_path)):
             self.draw(file_path=self.file_path[i],pad_gauche=True)
+    def zoom_gauche(self):
+        plt.cla()
+        for i in range(len(self.file_path)):
+            self.draw(file_path=self.file_path[i],zoomgauche=True)
+    def zoom_droit(self) :
+        plt.cla()
+        for i in range(len(self.file_path)):
+            self.draw(file_path=self.file_path[i],zoomdroit=True)
     def zoomplus(self):
         plt.cla()
         for i in range(len(self.file_path)):
@@ -111,11 +162,23 @@ class PlotWindow:
         plt.cla()
         for i in range(len(self.file_path)):
             self.draw(file_path=self.file_path[i],zoommoins=True)
+    def scale_bas(self):
+        plt.cla()
+        entry = float(self.scale_b.get())
+        for i in range(len(self.file_path)):
+            self.draw(file_path=self.file_path[i],scale_bas=entry)
+    def scale_gauche(self):
+        plt.cla()
+        entry = float(self.scale_g.get())
+        for i in range(len(self.file_path)):
+            self.draw(file_path=self.file_path[i],scale_gauche=entry)
     def erase(self):
         plt.cla()
         self.file_path = []
         self.highlight = None
         self.highlight2 = None
+        self.offset_1 = 0
+        self.offset_2 = 0
         self.unvalid = False
         self.function = []
         self.canvas.draw()
@@ -145,39 +208,64 @@ class PlotWindow:
     def load_file(self):
         entry = filedialog.askopenfilename(parent=root, title='Choose a file')
         try:
-            self.file_path.append(entry)
+            color1 = random.choice(colors)
+            colorbis = colors.copy()
+            colorbis.remove(color1)
+            self.file_path.append([entry,color1,random.choice(colorbis)])
+            plt.cla()
             for i in range(len(self.file_path)):
                 self.draw(file_path=self.file_path[i])
-
-            plt.clf()
             if not self.unvalid:
                 print('\033[92mSuccessfully loaded the file \t\t\t\t\t{',f"{entry}",'}\033[0m')
         except:
-            pass
-    def draw(self,file_path,zoomplus=False,zoommoins=False,pad_haut=False,pad_bas=False,pad_droit=False,pad_gauche=False):
+            print(tr.format_exc())
+    def draw(self,file_path,zoomplus=False,zoommoins=False,pad_haut=False,pad_bas=False,pad_droit=False,pad_gauche=False,zoomdroit=False,zoomgauche=False,scale_bas=1.0,scale_gauche=1.0):
+
         try:
-            with open(file_path, 'r') as file_in:
-                file = [line.replace(',', '.').strip() for line in file_in.readlines()[3:]]
-                data = np.array([list(map(float, line.split(';'))) for line in file])
+            with open(file_path[0], 'r') as file_in :
+                file = file_in.readlines()
+                data=[]
+                for line in file[3:]:
+                    line = line.replace('\n','')
+                    #line = line.replace(',','.')
+                    line = line.split('.')
+                    data.append(line)
+            file_name = os.path.basename(file_path[0])
+
+
+            data_arr = np.array(data, dtype=np.float32)
+
             number_of_graphs = len(data[0])-1
             if number_of_graphs < 2:
                 time, signal1 = data[0:len(data) - 1, 0], data[0:len(data) - 1, 1]
-                if max(signal1) > 50:
-                    data[:][1] = data[:][1] / 100
+                signal1 /= scale_gauche
+                time /= scale_bas
+                if len(self.file_path) > 1:
+                    if file_path == self.file_path[1]:
+                        time += self.offset_1
+                elif len(self.file_path) > 2:
+                    if file_path == self.file_path[2]:
+                        time += self.offset_2
 
-                if max(time) > 50:
-                    time = time/100
-                plt.plot(time, signal1, label=" V_output ", color='g')
+                self.ax.plot(time, signal1, label=file_name, color=file_path[1])
 
             else:
-                time, signal1, signal2 = data[0:len(data) - 1, 0], data[0:len(data) - 1, 1], data[0:len(data) - 1,2]
-                if max(signal1) > 50 or max(signal2) > 50:
-                    signal1 = signal1 / 100
-                    signal2 = signal2 /100
-                if max(time) > 50:
-                    time = time/100
-                plt.plot(time, signal2, label=" V_input ", color='r')
-                plt.plot(time, signal1, label=" V_output ", color='b')
+                time, signal1, signal2 = data_arr[:-1, 0], data_arr[:-1, 1], data_arr[:-1, 2]
+                time=time/scale_bas
+
+                signal1 = signal1/scale_gauche
+                signal2 = signal2/scale_gauche
+                if len(self.file_path) > 1:
+                    if file_path == self.file_path[1]:
+
+                        time += self.offset_1
+
+                elif len(self.file_path) > 2:
+                    if file_path == self.file_path[2]:
+                        time += self.offset_2
+
+                self.ax.plot(time, signal2, label=file_name, color=file_path[1])
+                self.ax.plot(time, signal1, label=file_name, color=file_path[2])
 
 
             if self.highlight != None:
@@ -188,10 +276,17 @@ class PlotWindow:
                 jonction_x = (time[0],time[len(time)-1])
                 jonction_y = (self.highlight2,self.highlight2)
                 plt.plot(jonction_x,jonction_y,label='Jonction2',color='c')
-
+            if zoomdroit:
+                scale = abs(self.ylim[0] - self.ylim[1]) / abs(self.xlim[0] - self.xlim[1])
+                scale = 2 * scale
+                plt.xlim(self.xlim[0] * scale, self.xlim[1] * scale)
+            if zoomgauche:
+                scale = abs(self.ylim[0] - self.ylim[1]) / abs(self.xlim[0] - self.xlim[1])
+                scale = 2 * scale
+                plt.ylim(self.ylim[0] * scale, self.ylim[1] * scale)
             if zoomplus:
                 scale = abs(self.ylim[0] - self.ylim[1]) / abs(self.xlim[0] - self.xlim[1])
-                scale = 2*scale
+                scale = 2 * scale
                 plt.xlim(self.xlim[0] * scale, self.xlim[1] * scale)
                 plt.ylim(self.ylim[0] * scale, self.ylim[1] * scale)
             if zoommoins:
@@ -244,19 +339,20 @@ class PlotWindow:
 
 
 
-            plt.xlim(x_0,x_1)
-            plt.ylim(y_0,y_1)
-            plt.xlabel(self.__xlabel)
-            plt.ylabel(self.__ylabel)
+            self.ax.set_xlim(x_0,x_1)
+            self.ax.set_ylim(y_0,y_1)
+            legend = self.ax.legend(loc='upper right', shadow=True, fontsize='x-large')
             self.xlim = (x_0,x_1)
             self.ylim = (y_0,y_1)
             self.canvas.draw()
-        except FileNotFound:
+
+        except FileNotFoundError:
             if file_path == '':
                 file_path = None
                 self.file_path.remove('')
             print("\033[91mCheck the file you used, the given file location is {",f'{file_path!r}',"}\033[0m")
             self.unvalid = True
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.geometry('2000x1500')
