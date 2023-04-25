@@ -14,4 +14,6 @@
 
 - [x] `Can load multiple files`
 
-- [ ] `Can offset graphs`
+- [x] `Can offset graphs`
+
+- [x] `Randomly chooses color`
