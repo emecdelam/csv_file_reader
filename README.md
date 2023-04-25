@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/Kiwi10101001/csv_file_reader"><img src="https://img.shields.io/badge/Version-0.0.1-orange"/></a>
+  <a href="https://github.com/Kiwi10101001/csv_file_reader"><img src="https://img.shields.io/badge/Version-0.0.2-orange"/></a>
 
 </p>
 
