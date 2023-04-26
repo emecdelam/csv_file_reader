@@ -18,6 +18,8 @@
 
 - [x] `Randomly chooses color`
 
+- [x] `Can change the range or the scale of the x-axis`
+
 # **Reports**
 
 - Feel free to report any error or bugged features and even suggest updates content
