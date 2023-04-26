@@ -3,7 +3,7 @@
 
 </p>
 
-# **csv_file_reader.py**
+# **csv_reader.py**
 - [x] `Read csv type file and makes a plot out of it`
 
 - [x] `Can plot any function using numpy`
